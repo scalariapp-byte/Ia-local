@@ -41,7 +41,6 @@ def _contexte(dossier: Path, demande: str, fichiers_imposes: list[str] | None):
     else:
         choisis = depot.selectionner(dossier, tous, demande, budget)
     plan = depot.arborescence(dossier, tous)
-    budget -= len(plan)
     blocs, envoyes, total = [], [], 0
     for f in choisis:
         texte = f.read_text(encoding="utf-8", errors="replace")

@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # Installation dans Termux (Android). À lancer une seule fois, avec Internet :
-#   bash installer.sh            -> installation de base + modèle 1.5B
+#   bash installer.sh            -> installation de base + modèle 3B
 #   bash installer.sh --complet  -> + Java/Kotlin pour vérifier en compilant (~500 Mo de plus)
 set -e
 cd "$(dirname "$0")"
@@ -26,7 +26,7 @@ if [ "$1" = "--complet" ]; then
 fi
 
 echo "== 3/4 Modèle (le seul téléchargement lourd) =="
-python -m ia telecharger coder-1.5b
+python -m ia telecharger coder-3b
 
 echo "== 4/4 Raccourci 'ia' =="
 cat > "$PREFIX/bin/ia" <<EOS

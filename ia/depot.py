@@ -61,11 +61,17 @@ def lister_fichiers(dossier: Path) -> list[Path]:
     return sorted(fichiers)
 
 
-def arborescence(dossier: Path, fichiers: list[Path], limite: int = 300) -> str:
-    """Vue d'ensemble du projet : permet au modèle de 'ne pas se perdre'."""
-    lignes = [str(f.relative_to(dossier)) for f in fichiers[:limite]]
-    if len(fichiers) > limite:
-        lignes.append(f"... (+{len(fichiers) - limite} fichiers)")
+def arborescence(dossier: Path, fichiers: list[Path], max_caracteres: int = 4000) -> str:
+    """Vue d'ensemble du projet : permet au modèle de 'ne pas se perdre'.
+    Plafonnée (~1 100 tokens) pour ne pas manger la place du code."""
+    lignes, total = [], 0
+    for i, f in enumerate(fichiers):
+        rel = str(f.relative_to(dossier))
+        if total + len(rel) + 1 > max_caracteres:
+            lignes.append(f"... (+{len(fichiers) - i} fichiers)")
+            break
+        lignes.append(rel)
+        total += len(rel) + 1
     return "\n".join(lignes)
 
 

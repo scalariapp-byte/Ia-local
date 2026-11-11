@@ -1,5 +1,5 @@
 {
-  "defaut": "coder-1.5b",
+  "defaut": "coder-3b",
   "modeles": {
     "coder-0.5b": {
       "fichier": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
@@ -11,13 +11,19 @@
       "fichier": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
       "url": "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
       "taille": "~1,1 Go",
-      "note": "Bon compromis vitesse/qualité sur Poco M7 Pro."
+      "note": "Rapide. Pour les petits fichiers ou si le 3B est trop lent."
     },
     "coder-3b": {
       "fichier": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
       "url": "https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
       "taille": "~2,1 Go",
-      "note": "Meilleure qualité, 2x plus lent. Nécessite 8 Go de RAM."
+      "note": "Défaut avec 12 Go de RAM : meilleur compromis qualité/vitesse."
+    },
+    "coder-7b": {
+      "fichier": "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+      "url": "https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+      "taille": "~4,7 Go",
+      "note": "Meilleure qualité, ~2-3x plus lent que le 3B. Ferme les autres apps."
     }
   }
 }

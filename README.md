@@ -40,8 +40,8 @@ Le « cerveau » est un modèle open source déjà entraîné au code (Qwen2.5-C
 ## Utilisation (hors ligne)
 
 ```bash
-ia serveur                      # démarre l'IA (modèle par défaut : coder-1.5b)
-ia serveur coder-3b             # ou un autre modèle (ia telecharger coder-3b avant)
+ia serveur                      # démarre l'IA (modèle par défaut : coder-3b)
+ia serveur coder-7b             # plus précis, plus lent (ia telecharger coder-7b avant)
 ia modeles                      # liste les modèles, ✓ = téléchargé
 
 ia analyser moncompte/monapp                                  # liste les problèmes
@@ -60,10 +60,10 @@ Le serveur fournit aussi une interface de chat : ouvre `http://127.0.0.1:8080` d
 
 ## Ce qu'il faut savoir (limites réelles)
 
-- **Vitesse.** Estimation pour le 1.5B sur Dimensity 7025 : lecture d'environ 40-80 tokens/s, écriture d'environ 8-15 tokens/s. Un fichier de 300 lignes prend environ 1 minute, deux fois plus avec le 3B. Ces chiffres ne sont pas mesurés : vérifie-les avec ton premier essai.
+- **Vitesse.** Estimations sur Dimensity 7025, non mesurées (vérifie-les à ton premier essai) : un fichier de 300 lignes prend ~30 s avec le 1.5B, ~1-2 min avec le 3B (défaut) et ~3-5 min avec le 7B.
 - **Qualité.** Un modèle de 1,5 à 3B corrige bien les bugs localisés (null, indices, conditions, oublis). Il est fragile dès qu'une correction touche plusieurs fichiers. Plus ta demande est précise (fichier, symptôme, message d'erreur), meilleur est le résultat. Garde la confirmation tant que tu n'as pas confiance : `--auto` sert pour les cas simples.
 - **Vérification.** Sans `--compiler`, la vérification se limite à la structure (accolades, guillemets) et à ktlint s'il est installé. La compilation Kotlin hors Gradle ignore les références Android : elle détecte la syntaxe, pas tout. La vraie compilation du projet doit passer par GitHub Actions après `--pousser`.
-- **Mémoire.** Avec 8 Go de RAM, le 3B fonctionne si tu fermes les autres apps. Variables utiles : `IA_CONTEXTE=16384` (plus de code lu, plus de RAM) et `IA_THREADS=4` (essaie 2 à 6).
+- **Mémoire (12 Go).** Le 3B occupe ~3 Go et le 7B ~6 Go : ferme les autres apps avec le 7B. Variables utiles : `IA_MAX_CODE=14000` (code envoyé par requête : plus = plus de fichiers lus d'un coup, mais plus lent), `IA_CONTEXTE=16384` (descends à 8192 si Android ferme Termux) et `IA_THREADS=4` (essaie 2 à 6).
 
 ## Tests
 
