@@ -39,7 +39,8 @@ def _afficher_vitesse(t: dict) -> str:
         return ""
 
 
-def discuter(messages, temperature=0.2, max_tokens=1500, flux=True, url=None, arret=None) -> str:
+def discuter(messages, temperature=0.2, max_tokens=1500, flux=True, url=None, arret=None,
+             stop=None) -> str:
     """Envoie une conversation au modèle et renvoie sa réponse complète.
 
     Avec flux=True, la réponse s'affiche au fur et à mesure (utile : le téléphone est lent,
@@ -54,6 +55,8 @@ def discuter(messages, temperature=0.2, max_tokens=1500, flux=True, url=None, ar
         "stream": flux,
         "repeat_penalty": 1.1,
         "cache_prompt": True,
+        # Arrêt côté serveur : il s'arrête net et envoie quand même ses mesures de vitesse.
+        **({"stop": stop} if stop else {}),
     }).encode()
     req = urllib.request.Request(
         url + "/v1/chat/completions", data=corps,

@@ -22,18 +22,30 @@ CAUSE: (1 à 2 phrases : pourquoi le code est faux)
 
 FICHIER: chemin/relatif/du/fichier.kt
 <<<<<<< AVANT
-(lignes copiées à l'identique depuis le fichier, 1 à 10 lignes)
+(SEULEMENT les lignes à changer, copiées à l'identique : 1 à 5 lignes)
 =======
-(lignes corrigées)
+(les mêmes lignes, corrigées)
+>>>>>>> APRES
+
+FIN
+
+Exemple de bonne réponse :
+CAUSE: La condition est inversée, l'utilisateur non connecté accède à l'écran.
+
+FICHIER: app/src/main/java/com/app/Login.kt
+<<<<<<< AVANT
+        if (utilisateur != null) {
+=======
+        if (utilisateur == null) {
 >>>>>>> APRES
 
 FIN
 
 Règles :
-- Copie le bloc AVANT caractère pour caractère.
-- Écris UNIQUEMENT les blocs qui changent quelque chose. Jamais de bloc où AVANT et APRES sont identiques.
-- Le plus souvent, un seul bloc suffit.
-- Après le dernier bloc, écris FIN. Rien d'autre."""
+- Ne recopie JAMAIS le fichier entier ni une fonction entière : uniquement les lignes modifiées.
+- Corrige le bug demandé, rien d'autre : ne change ni le style, ni les noms, ni les types.
+- Jamais de bloc où AVANT et APRES sont identiques.
+- Après le dernier bloc, écris FIN."""
 
 
 def _reponse_complete(texte: str) -> bool:
@@ -99,7 +111,7 @@ def corriger(cible: str, demande: str = "", fichiers=None, auto=False, compiler=
     for essai in range(1, essais + 1):
         print(f"\n=== Essai {essai}/{essais} ===")
         reponse = llm.discuter(messages, temperature=0.1 if essai == 1 else 0.4,
-                               max_tokens=1000, arret=_reponse_complete)
+                               max_tokens=1000, arret=_reponse_complete, stop=["\nFIN"])
         messages.append({"role": "assistant", "content": reponse})
         blocs = modifs.extraire_blocs(reponse)
         if not blocs:
