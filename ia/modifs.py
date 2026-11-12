@@ -30,10 +30,16 @@ class Bloc:
 
 
 def extraire_blocs(texte: str) -> list[Bloc]:
-    return [
-        Bloc(m["fichier"].strip(), m["avant"], m["apres"])
-        for m in _BLOC.finditer(texte)
-    ]
+    """Extrait les blocs, en ignorant ceux qui ne changent rien (AVANT == APRES) et les doublons."""
+    blocs, vus = [], set()
+    for m in _BLOC.finditer(texte):
+        b = Bloc(m["fichier"].strip(), m["avant"], m["apres"])
+        cle = (b.fichier, b.avant.strip(), b.apres.strip())
+        if b.avant.strip() == b.apres.strip() or cle in vus:
+            continue
+        vus.add(cle)
+        blocs.append(b)
+    return blocs
 
 
 def _remplacer(contenu: str, avant: str, apres: str) -> str | None:

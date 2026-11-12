@@ -7,7 +7,7 @@ import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
-from ia import agent, config, modifs, verif, depot
+from ia import agent, config, llm, modifs, verif, depot
 
 KOTLIN_BUG = """package com.exemple
 
@@ -100,6 +100,26 @@ class TestModifs(unittest.TestCase):
             b = [modifs.Bloc("../../etc/passwd", "", "x")]
             _, err = modifs.appliquer(d, b)
             self.assertTrue(err)
+
+
+class TestBouclesModele(unittest.TestCase):
+    def test_ignore_blocs_inutiles(self):
+        texte = BONNE + "\nFICHIER: app/Panier.kt\n<<<<<<< AVANT\nreturn somme\n=======\nreturn somme\n>>>>>>> APRES\n" + BONNE
+        self.assertEqual(len(modifs.extraire_blocs(texte)), 1)
+
+    def test_detecte_repetition(self):
+        phrase = "Cause du bug : La boucle for dans la méthode total() utilise i comme index, mais elle doit utiliser articles.size.\n"
+        self.assertTrue(llm.tourne_en_rond("Début.\n" + phrase * 3))
+
+    def test_pas_de_faux_positif_avant_apres(self):
+        code = "\n".join(f"        val ligne{i} = calcul({i}) + autre({i})" for i in range(8))
+        texte = f"CAUSE: x\n\nFICHIER: a.kt\n<<<<<<< AVANT\n{code}\nreturn 1\n=======\n{code}\nreturn 2\n>>>>>>> APRES\n"
+        for i in range(1, len(texte) + 1):
+            self.assertFalse(llm.tourne_en_rond(texte[:i]))
+
+    def test_fin_detectee(self):
+        self.assertTrue(agent._reponse_complete(BONNE + "\nFIN"))
+        self.assertFalse(agent._reponse_complete(BONNE))
 
 
 class TestVerif(unittest.TestCase):

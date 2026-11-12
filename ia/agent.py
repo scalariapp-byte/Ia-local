@@ -1,4 +1,5 @@
 """Le cerveau : enchaîne lecture du dépôt -> analyse -> correction -> vérification -> commit."""
+import re
 from pathlib import Path
 
 from . import config, depot, llm, modifs, verif
@@ -15,17 +16,29 @@ ORDRE = (
     "3) bugs de logique, 4) failles de sécurité, 5) performances, 6) lisibilité."
 )
 
-FORMAT_CORRECTION = """Pour CHAQUE modification, utilise EXACTEMENT ce format :
+FORMAT_CORRECTION = """Réponds dans cet ordre, puis écris FIN et arrête-toi :
+
+CAUSE: (1 à 2 phrases : pourquoi le code est faux)
 
 FICHIER: chemin/relatif/du/fichier.kt
 <<<<<<< AVANT
-(lignes copiées à l'identique depuis le fichier, 2 à 10 lignes, suffisantes pour être uniques)
+(lignes copiées à l'identique depuis le fichier, 1 à 10 lignes)
 =======
 (lignes corrigées)
 >>>>>>> APRES
 
-Règles : copie le bloc AVANT caractère pour caractère. Un bloc par endroit modifié.
-Avant les blocs, écris en 1 à 3 phrases la cause du bug."""
+FIN
+
+Règles :
+- Copie le bloc AVANT caractère pour caractère.
+- Écris UNIQUEMENT les blocs qui changent quelque chose. Jamais de bloc où AVANT et APRES sont identiques.
+- Le plus souvent, un seul bloc suffit.
+- Après le dernier bloc, écris FIN. Rien d'autre."""
+
+
+def _reponse_complete(texte: str) -> bool:
+    """Coupe la génération dès que le modèle a fini (FIN) : chaque token coûte cher sur téléphone."""
+    return bool(re.search(r">{5,}\s*APR[EÈ]S\s*\n+\s*FIN\b", texte, re.IGNORECASE))
 
 
 def _contexte(dossier: Path, demande: str, fichiers_imposes: list[str] | None):
@@ -85,7 +98,8 @@ def corriger(cible: str, demande: str = "", fichiers=None, auto=False, compiler=
     nouveaux = {}
     for essai in range(1, essais + 1):
         print(f"\n=== Essai {essai}/{essais} ===")
-        reponse = llm.discuter(messages, temperature=0.1 if essai == 1 else 0.4)
+        reponse = llm.discuter(messages, temperature=0.1 if essai == 1 else 0.4,
+                               max_tokens=1000, arret=_reponse_complete)
         messages.append({"role": "assistant", "content": reponse})
         blocs = modifs.extraire_blocs(reponse)
         if not blocs:
