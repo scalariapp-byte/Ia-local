@@ -1,5 +1,6 @@
 """Tests sans vrai modèle : un faux serveur imite llama-server."""
 import json
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -120,6 +121,52 @@ class TestBouclesModele(unittest.TestCase):
     def test_fin_detectee(self):
         self.assertTrue(agent._reponse_complete(BONNE + "\nFIN"))
         self.assertFalse(agent._reponse_complete(BONNE))
+
+
+FAUSSE_TELEPHONE = """CAUSE: index trop grand.
+
+FICHIER: app/Panier.kt
+<<<<<<< AVANT
+        for (i in 0..articles.size) {
+=======
+        for (article in articles) {
+>>>>>>> APRES
+"""
+
+
+class TestVariablesOrphelines(unittest.TestCase):
+    def test_cas_reel_du_telephone_refuse(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = depot_test(Path(t))
+            nouveaux, err = modifs.appliquer(d, modifs.extraire_blocs(FAUSSE_TELEPHONE))
+            self.assertEqual(err, [])
+            problemes = verif.verifier(nouveaux)
+            self.assertEqual(len(problemes), 1)
+            self.assertIn("'i'", problemes[0])
+            self.assertIn("articles[i]", problemes[0])
+
+    def test_bonnes_corrections_acceptees(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = depot_test(Path(t))
+            for texte in (BONNE, BONNE.replace("articles.indices", "0 until articles.size")):
+                nouveaux, _ = modifs.appliquer(d, modifs.extraire_blocs(texte))
+                self.assertEqual(verif.verifier(nouveaux), [])
+            complete = KOTLIN_BUG.replace("for (i in 0..articles.size) {\n            somme += articles[i]",
+                                          "for (article in articles) {\n            somme += article")
+            self.assertEqual(verif.variables_orphelines(KOTLIN_BUG, complete), [])
+
+
+@unittest.skipUnless(shutil.which("javac"), "javac absent")
+class TestCompilationDifferentielle(unittest.TestCase):
+    def test_ignore_erreurs_existantes_detecte_nouvelles(self):
+        ancien = "class A {\n  void f() { android.widget.Toast t = null; int x = 1; System.out.println(x); }\n}\n"
+        bon = ancien.replace("int x = 1", "int x = 2")
+        mauvais = ancien.replace("println(x)", "println(y)")
+        with tempfile.TemporaryDirectory() as t:
+            f = Path(t) / "A.java"
+            f.write_text(ancien)
+            self.assertEqual(verif.verifier({f: bon}, compiler=True), [])
+            self.assertTrue(verif.verifier({f: mauvais}, compiler=True))
 
 
 class TestVerif(unittest.TestCase):

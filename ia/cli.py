@@ -20,6 +20,10 @@ def main(argv=None) -> int:
 
     sub.add_parser("arret", help="Arrête le moteur IA")
 
+    s = sub.add_parser("vitesse", help="Mesure la vitesse du modèle selon le nombre de threads")
+    s.add_argument("modele", nargs="?")
+    s.add_argument("--threads", default="2,4,6,8")
+
     def commun(s):
         s.add_argument("depot", help="utilisateur/depot, URL GitHub ou dossier local")
         s.add_argument("demande", nargs="?", default="", help="Ce que tu veux (entre guillemets)")
@@ -47,13 +51,15 @@ def main(argv=None) -> int:
         if a.cmd == "modeles":
             for nom, m in config.charger_modeles()["modeles"].items():
                 present = "✓" if serveur.chemin_modele(nom).exists() else " "
-                print(f"[{present}] {nom:12} {m['taille']:8} {m['note']}")
+                print(f"[{present}] {nom:16} {m["taille"]:8} {m['note']}")
         elif a.cmd == "telecharger":
             serveur.telecharger(a.modele or defaut)
         elif a.cmd == "serveur":
             serveur.demarrer(a.modele or defaut, arriere_plan=not a.premier_plan)
         elif a.cmd == "arret":
             serveur.arreter()
+        elif a.cmd == "vitesse":
+            serveur.vitesse(a.modele or defaut, a.threads)
         elif a.cmd == "analyser":
             agent.analyser(a.depot, a.demande, a.fichier)
         elif a.cmd == "corriger":

@@ -43,14 +43,31 @@ def telecharger(nom: str) -> Path:
     return dest
 
 
-def binaire_llama() -> str:
+def binaire_llama(nom: str = "llama-server") -> str:
     for candidat in (
-        shutil.which("llama-server"),
-        str(config.RACINE / "llama.cpp" / "build" / "bin" / "llama-server"),
+        shutil.which(nom),
+        str(config.RACINE / "llama.cpp" / "build" / "bin" / nom),
     ):
         if candidat and Path(candidat).exists():
             return candidat
-    raise SystemExit("llama-server introuvable. Lance d'abord : bash installer.sh")
+    raise SystemExit(f"{nom} introuvable. Lance d'abord : bash installer.sh")
+
+
+def vitesse(nom: str, threads: str = "2,4,6,8") -> None:
+    """Mesure la vitesse réelle du modèle sur ce téléphone pour plusieurs nombres de threads.
+    pp = lecture du code (tokens/s), tg = écriture de la réponse (tokens/s)."""
+    modele = chemin_modele(nom)
+    if not modele.exists():
+        raise SystemExit(f"Modèle absent. Télécharge-le : python -m ia telecharger {nom}")
+    if llm.serveur_actif():
+        print("Arrêt du serveur pendant la mesure (il fausserait les chiffres).")
+        arreter()
+    cmd = [binaire_llama("llama-bench"), "-m", str(modele), "-t", threads,
+           "-p", "256", "-n", "32", "-r", "1"]
+    print("Mesure en cours (2 à 6 minutes, ne touche pas au téléphone)...\n")
+    subprocess.run(cmd)
+    print("\nLigne pp256 = lecture, tg32 = écriture. Choisis le nombre de threads (colonne"
+          " threads) le plus rapide, puis : export IA_THREADS=<nombre> && ia serveur")
 
 
 def demarrer(nom: str, arriere_plan: bool = True) -> None:

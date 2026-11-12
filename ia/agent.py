@@ -43,6 +43,7 @@ FIN
 
 Règles :
 - Ne recopie JAMAIS le fichier entier ni une fonction entière : uniquement les lignes modifiées.
+- Si tu renommes ou supprimes une variable, mets dans le même bloc TOUTES les lignes qui l'utilisent.
 - Corrige le bug demandé, rien d'autre : ne change ni le style, ni les noms, ni les types.
 - Jamais de bloc où AVANT et APRES sont identiques.
 - Après le dernier bloc, écris FIN."""
