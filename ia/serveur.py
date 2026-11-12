@@ -44,9 +44,11 @@ def telecharger(nom: str) -> Path:
 
 
 def binaire_llama(nom: str = "llama-server") -> str:
+    # La version compilée sur le téléphone (compiler_llama.sh) passe avant le paquet
+    # Termux générique, beaucoup plus lent.
     for candidat in (
-        shutil.which(nom),
         str(config.RACINE / "llama.cpp" / "build" / "bin" / nom),
+        shutil.which(nom),
     ):
         if candidat and Path(candidat).exists():
             return candidat
@@ -62,7 +64,9 @@ def vitesse(nom: str, threads: str = "2,4,6,8") -> None:
     if llm.serveur_actif():
         print("Arrêt du serveur pendant la mesure (il fausserait les chiffres).")
         arreter()
-    cmd = [binaire_llama("llama-bench"), "-m", str(modele), "-t", threads,
+    binaire = binaire_llama("llama-bench")
+    print(f"Moteur utilisé : {binaire}")
+    cmd = [binaire, "-m", str(modele), "-t", threads,
            "-p", "256", "-n", "32", "-r", "1"]
     print("Mesure en cours (2 à 6 minutes, ne touche pas au téléphone)...\n")
     subprocess.run(cmd)
@@ -77,9 +81,9 @@ def demarrer(nom: str, arriere_plan: bool = True) -> None:
     if llm.serveur_actif():
         arreter()
     port = config.URL_SERVEUR.rsplit(":", 1)[-1].split("/")[0]
-    # Sur Dimensity 7025 : 2 gros cœurs A78 + 6 petits A55. 4 threads est en général le
-    # meilleur réglage (au-delà, les petits cœurs ralentissent le calcul). À ajuster.
-    threads = os.environ.get("IA_THREADS", "4")
+    # Mesuré sur Poco M7 Pro (paquet Termux générique) : 8 threads est le plus rapide
+    # (lecture 7,2 t/s contre 5,2 avec 4). À re-mesurer avec : ia vitesse
+    threads = os.environ.get("IA_THREADS", "8")
     cmd = [binaire_llama(), "-m", str(modele), "-c", str(config.CONTEXTE),
            "-t", threads, "--host", "127.0.0.1", "--port", port]
     config.DOSSIER_ETAT.mkdir(parents=True, exist_ok=True)

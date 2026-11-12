@@ -15,7 +15,7 @@ if ! command -v llama-server >/dev/null; then
   if ! pkg install -y llama-cpp 2>/dev/null || ! command -v llama-server >/dev/null; then
     pkg install -y clang cmake
     [ -d llama.cpp ] || git clone --depth 1 https://github.com/ggml-org/llama.cpp
-    cmake -S llama.cpp -B llama.cpp/build -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
+    cmake -S llama.cpp -B llama.cpp/build -DCMAKE_BUILD_TYPE=Release
     cmake --build llama.cpp/build --target llama-server -j 4
   fi
 fi

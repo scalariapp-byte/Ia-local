@@ -37,6 +37,17 @@ Le « cerveau » est un modèle open source déjà entraîné au code (Qwen2.5-C
    ```
    Pour vérifier aussi les corrections en compilant (environ 500 Mo de plus) : `bash installer.sh --complet`.
 
+### Accélérer le moteur (recommandé)
+
+Le paquet `llama-cpp` de Termux est compilé de façon générique. Sur Poco M7 Pro, il a mesuré 7 tokens/s en lecture et 4,5 en écriture avec le 3B. Compiler llama.cpp sur le téléphone active les instructions accélérées de la puce (dotprod) :
+
+```bash
+bash compiler_llama.sh     # 10 à 25 min, téléphone branché
+ia vitesse                 # compare avec les chiffres précédents
+```
+
+La version compilée est utilisée automatiquement dès qu'elle existe.
+
 ## Utilisation (hors ligne)
 
 ```bash
