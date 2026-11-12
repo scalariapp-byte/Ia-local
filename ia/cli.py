@@ -51,7 +51,7 @@ def main(argv=None) -> int:
         if a.cmd == "modeles":
             for nom, m in config.charger_modeles()["modeles"].items():
                 present = "✓" if serveur.chemin_modele(nom).exists() else " "
-                print(f"[{present}] {nom:16} {m["taille"]:8} {m['note']}")
+                print(f"[{present}] {nom:16} {m['taille']:8} {m['note']}")
         elif a.cmd == "telecharger":
             serveur.telecharger(a.modele or defaut)
         elif a.cmd == "serveur":
